@@ -6,17 +6,17 @@ import com.encriptadordesencriptador.domain.valueobject.CipherText;
 import com.encriptadordesencriptador.domain.valueobject.GeneralKey;
 import com.encriptadordesencriptador.domain.valueobject.PlainText;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class CliRunner {
+
     private static final Scanner scanner = new Scanner(System.in);
     private static final CipherService cipherService = new CipherServiceImpl();
-    private static final String FILE_PATH = "src/main/resources/encryptedText.txt";
+    private static final String FILE_NAME = "encryptedText.txt";
 
     public static void main(String[] args) {
         while (true) {
@@ -79,20 +79,30 @@ public class CliRunner {
     }
 
     private static void saveToFile(String text) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            writer.write(text);
-            System.out.println("Texto encriptado guardado en " + FILE_PATH);
+        try {
+            Path path = getWritablePath(FILE_NAME);
+            Files.write(path, text.getBytes());
+            System.out.println("Texto encriptado guardado en " + path.toString());
         } catch (IOException e) {
             System.out.println("Error al guardar el archivo: " + e.getMessage());
         }
     }
 
     private static String readFromFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            return reader.readLine();
+        try {
+            Path path = getWritablePath(FILE_NAME);
+            return Files.readString(path);
         } catch (IOException e) {
             System.out.println("Error al leer el archivo: " + e.getMessage());
             return null;
         }
+    }
+
+    private static Path getWritablePath(String fileName) throws IOException {
+        Path path = Paths.get(System.getProperty("user.home"), fileName);
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+        return path;
     }
 }

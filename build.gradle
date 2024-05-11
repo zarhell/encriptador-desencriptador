@@ -2,7 +2,6 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.4'
-	id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'com.encriptaciondesencriptacion'
@@ -23,8 +22,7 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+
 	implementation 'org.openjfx:javafx-controls:17.0.8'
 	implementation 'org.openjfx:javafx-graphics:17.0.8'
 	implementation 'org.openjfx:javafx-fxml:17.0.8'
@@ -35,8 +33,4 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-javafx {
-	version = "17.0.8"
-	modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
