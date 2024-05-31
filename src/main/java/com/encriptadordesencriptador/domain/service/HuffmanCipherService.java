@@ -5,99 +5,106 @@ import com.encriptadordesencriptador.application.port.Cipher;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public class HuffmanCipherService implements Cipher {
 
-    private class Node implements Comparable<Node> {
-        char ch;
-        int frequency;
-        Node left, right;
+    private Map<Character, String> huffmanCodes;
+    private Node root;
 
-        Node(char ch, int frequency, Node left, Node right) {
-            this.ch = ch;
+    private static class Node implements Comparable<Node> {
+        final char character;
+        final int frequency;
+        final Node leftChild, rightChild;
+
+        Node(char character, int frequency, Node leftChild, Node rightChild) {
+            this.character = character;
             this.frequency = frequency;
-            this.left = left;
-            this.right = right;
+            this.leftChild = leftChild;
+            this.rightChild = rightChild;
         }
 
         boolean isLeaf() {
-            return left == null && right == null;
+            return leftChild == null && rightChild == null;
         }
 
         @Override
-        public int compareTo(Node o) {
-            return this.frequency - o.frequency;
+        public int compareTo(Node other) {
+            return Integer.compare(this.frequency, other.frequency);
         }
     }
-
-    private Map<Character, String> huffmanCodes;
-    private Node root;
 
     @Override
     public String encrypt(String text) {
         Map<Character, Integer> frequencyMap = buildFrequencyMap(text);
         root = buildHuffmanTree(frequencyMap);
-        huffmanCodes = new HashMap<>();
-        buildHuffmanCodes(root, "");
-        return encode(text);
+        huffmanCodes = generateHuffmanCodes(root);
+        return encodeText(text);
     }
 
     @Override
-    public String decrypt(String text) {
-        return decode(text);
+    public String decrypt(String encodedText) {
+        return decodeText(encodedText);
     }
 
     private Map<Character, Integer> buildFrequencyMap(String text) {
-        Map<Character, Integer> frequencyMap = new HashMap<>();
-        for (char ch : text.toCharArray()) {
-            frequencyMap.put(ch, frequencyMap.getOrDefault(ch, 0) + 1);
-        }
-        return frequencyMap;
+        return text.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toMap(c -> c, c -> 1, Integer::sum));
     }
 
     private Node buildHuffmanTree(Map<Character, Integer> frequencyMap) {
-        PriorityQueue<Node> pq = new PriorityQueue<>();
-        for (var entry : frequencyMap.entrySet()) {
-            pq.add(new Node(entry.getKey(), entry.getValue(), null, null));
+        PriorityQueue<Node> priorityQueue = frequencyMap.entrySet().stream()
+                .map(entry -> new Node(entry.getKey(), entry.getValue(), null, null))
+                .collect(Collectors.toCollection(PriorityQueue::new));
+
+        while (priorityQueue.size() > 1) {
+            Node leftChild = priorityQueue.poll();
+            Node rightChild = priorityQueue.poll();
+            Node parentNode = new Node('\0', leftChild.frequency + rightChild.frequency, leftChild, rightChild);
+            priorityQueue.add(parentNode);
         }
 
-        while (pq.size() > 1) {
-            Node left = pq.poll();
-            Node right = pq.poll();
-            Node parent = new Node('\0', left.frequency + right.frequency, left, right);
-            pq.add(parent);
-        }
-
-        return pq.poll();
+        return priorityQueue.poll();
     }
 
-    private void buildHuffmanCodes(Node node, String code) {
-        if (!node.isLeaf()) {
-            buildHuffmanCodes(node.left, code + '0');
-            buildHuffmanCodes(node.right, code + '1');
+    private Map<Character, String> generateHuffmanCodes(Node root) {
+        Map<Character, String> huffmanCodes = new HashMap<>();
+        buildHuffmanCode(root, "", huffmanCodes);
+        return huffmanCodes;
+    }
+
+    private void buildHuffmanCode(Node node, String code, Map<Character, String> huffmanCodes) {
+        if (node.isLeaf()) {
+            huffmanCodes.put(node.character, code);
         } else {
-            huffmanCodes.put(node.ch, code);
+            buildHuffmanCode(node.leftChild, code + '0', huffmanCodes);
+            buildHuffmanCode(node.rightChild, code + '1', huffmanCodes);
         }
     }
 
-    private String encode(String text) {
-        StringBuilder sb = new StringBuilder();
-        for (char ch : text.toCharArray()) {
-            sb.append(huffmanCodes.get(ch));
-        }
-        return sb.toString();
+    private String encodeText(String text) {
+        return text.chars()
+                .mapToObj(c -> (char) c)
+                .map(huffmanCodes::get)
+                .collect(Collectors.joining());
     }
 
-    private String decode(String text) {
-        StringBuilder sb = new StringBuilder();
-        Node node = root;
-        for (char bit : text.toCharArray()) {
-            node = bit == '0' ? node.left : node.right;
-            if (node.isLeaf()) {
-                sb.append(node.ch);
-                node = root;
-            }
-        }
-        return sb.toString();
+    private String decodeText(String encodedText) {
+        return encodedText.chars()
+                .mapToObj(bit -> (char) bit)
+                .map(bit -> bit == '0' ? '0' : '1')
+                .collect(() -> new Object[]{new StringBuilder(), root}, (acc, bit) -> {
+                    Node currentNode = (Node) acc[1];
+                    currentNode = bit == '0' ? currentNode.leftChild : currentNode.rightChild;
+                    if (currentNode.isLeaf()) {
+                        ((StringBuilder) acc[0]).append(currentNode.character);
+                        acc[1] = root;
+                    } else {
+                        acc[1] = currentNode;
+                    }
+                }, (acc1, acc2) -> {
+                    throw new UnsupportedOperationException("Parallel execution not supported");
+                })[0].toString();
     }
 }

@@ -1,9 +1,14 @@
 package com.encriptadordesencriptador.infrastructure.cli;
 
 import com.encriptadordesencriptador.application.port.CipherUseCase;
+import com.encriptadordesencriptador.application.port.EncryptionServicePort;
+import com.encriptadordesencriptador.application.port.FileServicePort;
 import com.encriptadordesencriptador.domain.model.CipherText;
 import com.encriptadordesencriptador.domain.model.GeneralKey;
 import com.encriptadordesencriptador.domain.model.PlainText;
+import com.encriptadordesencriptador.domain.service.EncryptionService;
+import com.encriptadordesencriptador.domain.service.FileService;
+import com.encriptadordesencriptador.infrastructure.adapter.CipherAdapter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,20 +16,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+
 public class CliRunner {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final CipherUseCase CIPHER_USE_CASE = new CipherAdapter();
-    private static final String FILE_NAME = "encryptedText.txt";
+    private static final EncryptionServicePort encryptionService = new EncryptionService(new CipherAdapter());
+    private static final FileServicePort fileService = new FileService();
 
     public static void main(String[] args) {
         while (true) {
-            System.out.println("=== Sistema de Encriptación ===");
-            System.out.println("1. Encriptar texto");
-            System.out.println("2. Desencriptar texto desde archivo");
-            System.out.println("3. Salir");
-            System.out.print("Seleccione una opción: ");
-
+            printMainMenu();
             String choice = scanner.nextLine();
 
             switch (choice) {
@@ -48,60 +49,52 @@ public class CliRunner {
         System.out.print("Ingrese el texto a encriptar: ");
         String text = scanner.nextLine();
 
-        System.out.print("Ingrese la clave general (caesar, vigenere, transposition, huffman): ");
-        String generalKey = scanner.nextLine();
+        printEncryptionOptions();
 
-        PlainText plainText = new PlainText(text);
-        GeneralKey key = new GeneralKey(generalKey);
+        String generalKey = encryptionService.getEncryptionKeyFromUser();
 
-        CipherText encryptedText = CIPHER_USE_CASE.encrypt(plainText, key);
-        System.out.println("Texto encriptado: " + encryptedText.getValue());
+        String encryptedText = encryptionService.encryptText(text, generalKey);
+        System.out.println("Texto encriptado: " + encryptedText);
 
-        saveToFile(encryptedText.getValue());
+        fileService.saveToFile(encryptedText);
     }
 
     private static void handleDecryption() {
-        System.out.print("Ingrese la clave general (caesar, vigenere, transposition, huffman): ");
-        String generalKey = scanner.nextLine();
+        printEncryptionOptions();
 
-        String encryptedText = readFromFile();
+        String generalKey = encryptionService.getEncryptionKeyFromUser();
+
+        String encryptedText = fileService.readFromFile();
         if (encryptedText == null) {
             System.out.println("No se pudo leer el texto encriptado desde el archivo.");
             return;
         }
 
-        CipherText cipherText = new CipherText(encryptedText);
-        GeneralKey key = new GeneralKey(generalKey);
-
-        PlainText decryptedText = CIPHER_USE_CASE.decrypt(cipherText, key);
-        System.out.println("Texto desencriptado: " + decryptedText.getValue());
+        String decryptedText = encryptionService.decryptText(encryptedText, generalKey);
+        System.out.println("Texto desencriptado: " + decryptedText);
     }
 
-    private static void saveToFile(String text) {
-        try {
-            Path path = getWritablePath(FILE_NAME);
-            Files.write(path, text.getBytes());
-            System.out.println("Texto encriptado guardado en " + path.toString());
-        } catch (IOException e) {
-            System.out.println("Error al guardar el archivo: " + e.getMessage());
-        }
+    private static void printMainMenu() {
+        System.out.println("=== Sistema de Encriptacion ===");
+        System.out.println("+---------------------------+");
+        System.out.println("| Indice | Opcion           |");
+        System.out.println("+---------------------------+");
+        System.out.println("|   1    | Encriptar texto  |");
+        System.out.println("|   2    | Desencriptar texto desde archivo |");
+        System.out.println("|   3    | Salir            |");
+        System.out.println("+---------------------------+");
+        System.out.print("Seleccione una opcion: ");
     }
 
-    private static String readFromFile() {
-        try {
-            Path path = getWritablePath(FILE_NAME);
-            return Files.readString(path);
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private static Path getWritablePath(String fileName) throws IOException {
-        Path path = Paths.get(System.getProperty("user.home"), fileName);
-        if (!Files.exists(path)) {
-            Files.createFile(path);
-        }
-        return path;
+    private static void printEncryptionOptions() {
+        System.out.println("+-----------------------+");
+        System.out.println("| Indice | Tipo         |");
+        System.out.println("+-----------------------+");
+        System.out.println("|   1    | Caesar       |");
+        System.out.println("|   2    | Vigenere     |");
+        System.out.println("|   3    | Transposition|");
+        System.out.println("|   4    | Huffman      |");
+        System.out.println("+-----------------------+");
+        System.out.print("Seleccione el tipo de encriptacion: ");
     }
 }
