@@ -1,10 +1,10 @@
 package com.encriptadordesencriptador.infrastructure.cli;
 
-import com.encriptadordesencriptador.application.port.CipherService;
-import com.encriptadordesencriptador.application.service.CipherServiceImpl;
-import com.encriptadordesencriptador.domain.valueobject.CipherText;
-import com.encriptadordesencriptador.domain.valueobject.GeneralKey;
-import com.encriptadordesencriptador.domain.valueobject.PlainText;
+import com.encriptadordesencriptador.application.port.CipherUseCase;
+import com.encriptadordesencriptador.infrastructure.adapter.CipherAdapter;
+import com.encriptadordesencriptador.domain.model.CipherText;
+import com.encriptadordesencriptador.domain.model.GeneralKey;
+import com.encriptadordesencriptador.domain.model.PlainText;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ import java.util.Scanner;
 public class CliRunner {
 
     private static final Scanner scanner = new Scanner(System.in);
-    private static final CipherService cipherService = new CipherServiceImpl();
+    private static final CipherUseCase CIPHER_USE_CASE = new CipherAdapter();
     private static final String FILE_NAME = "encryptedText.txt";
 
     public static void main(String[] args) {
@@ -55,7 +55,7 @@ public class CliRunner {
         PlainText plainText = new PlainText(text);
         GeneralKey key = new GeneralKey(generalKey);
 
-        CipherText encryptedText = cipherService.encrypt(plainText, key);
+        CipherText encryptedText = CIPHER_USE_CASE.encrypt(plainText, key);
         System.out.println("Texto encriptado: " + encryptedText.getValue());
 
         saveToFile(encryptedText.getValue());
@@ -74,7 +74,7 @@ public class CliRunner {
         CipherText cipherText = new CipherText(encryptedText);
         GeneralKey key = new GeneralKey(generalKey);
 
-        PlainText decryptedText = cipherService.decrypt(cipherText, key);
+        PlainText decryptedText = CIPHER_USE_CASE.decrypt(cipherText, key);
         System.out.println("Texto desencriptado: " + decryptedText.getValue());
     }
 

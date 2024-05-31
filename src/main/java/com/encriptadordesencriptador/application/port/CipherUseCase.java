@@ -4,7 +4,7 @@ import com.encriptadordesencriptador.domain.model.CipherText;
 import com.encriptadordesencriptador.domain.model.GeneralKey;
 import com.encriptadordesencriptador.domain.model.PlainText;
 
-public interface CipherService {
+public interface CipherUseCase {
     CipherText encrypt(PlainText plainText, GeneralKey key);
     PlainText decrypt(CipherText cipherText, GeneralKey key);
 }

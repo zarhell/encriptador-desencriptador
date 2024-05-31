@@ -1,4 +1,4 @@
-package com.encriptadordesencriptador.domain.valueobject;
+package com.encriptadordesencriptador.domain.model;
 
 public class PlainText {
     private final String value;

@@ -1,14 +1,14 @@
-package com.encriptadordesencriptador.application.service;
+package com.encriptadordesencriptador.infrastructure.adapter;
 
-import com.encriptadordesencriptador.application.port.CipherService;
+import com.encriptadordesencriptador.application.port.CipherUseCase;
 import com.encriptadordesencriptador.domain.service.CaesarCipherService;
 import com.encriptadordesencriptador.domain.service.TranspositionCipherService;
 import com.encriptadordesencriptador.domain.service.VigenereCipherService;
-import com.encriptadordesencriptador.domain.valueobject.CipherText;
-import com.encriptadordesencriptador.domain.valueobject.GeneralKey;
-import com.encriptadordesencriptador.domain.valueobject.PlainText;
+import com.encriptadordesencriptador.domain.model.CipherText;
+import com.encriptadordesencriptador.domain.model.GeneralKey;
+import com.encriptadordesencriptador.domain.model.PlainText;
 
-public class CipherServiceImpl implements CipherService {
+public class CipherAdapter implements CipherUseCase {
 
     @Override
     public CipherText encrypt(PlainText plainText, GeneralKey key) {

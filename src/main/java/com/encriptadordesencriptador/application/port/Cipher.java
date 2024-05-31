@@ -1,4 +1,4 @@
-package com.encriptadordesencriptador.domain.model;
+package com.encriptadordesencriptador.application.port;
 
 public interface Cipher {
 

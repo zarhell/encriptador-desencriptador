@@ -1,10 +1,10 @@
 package com.encriptadordesencriptador.infrastructure.config;
 
-import com.encriptadordesencriptador.application.port.CipherService;
-import com.encriptadordesencriptador.application.service.CipherServiceImpl;
+import com.encriptadordesencriptador.application.port.CipherUseCase;
+import com.encriptadordesencriptador.infrastructure.adapter.CipherAdapter;
 
 public class AppConfig {
-    public CipherService cipherService() {
-        return new CipherServiceImpl();
+    public CipherUseCase cipherService() {
+        return new CipherAdapter();
     }
 }

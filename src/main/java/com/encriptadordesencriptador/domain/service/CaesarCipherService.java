@@ -1,6 +1,6 @@
 package com.encriptadordesencriptador.domain.service;
 
-import com.encriptadordesencriptador.domain.model.Cipher;
+import com.encriptadordesencriptador.application.port.Cipher;
 
 public class CaesarCipherService implements Cipher {
 
