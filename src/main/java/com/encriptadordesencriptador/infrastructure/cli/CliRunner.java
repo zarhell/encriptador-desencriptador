@@ -1,7 +1,6 @@
 package com.encriptadordesencriptador.infrastructure.cli;
 
 import com.encriptadordesencriptador.application.port.CipherUseCase;
-import com.encriptadordesencriptador.infrastructure.adapter.CipherAdapter;
 import com.encriptadordesencriptador.domain.model.CipherText;
 import com.encriptadordesencriptador.domain.model.GeneralKey;
 import com.encriptadordesencriptador.domain.model.PlainText;
@@ -49,7 +48,7 @@ public class CliRunner {
         System.out.print("Ingrese el texto a encriptar: ");
         String text = scanner.nextLine();
 
-        System.out.print("Ingrese la clave general: ");
+        System.out.print("Ingrese la clave general (caesar, vigenere, transposition, huffman): ");
         String generalKey = scanner.nextLine();
 
         PlainText plainText = new PlainText(text);
@@ -62,7 +61,7 @@ public class CliRunner {
     }
 
     private static void handleDecryption() {
-        System.out.print("Ingrese la clave general: ");
+        System.out.print("Ingrese la clave general (caesar, vigenere, transposition, huffman): ");
         String generalKey = scanner.nextLine();
 
         String encryptedText = readFromFile();
