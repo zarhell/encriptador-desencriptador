@@ -1,8 +1,8 @@
 package com.encriptadordesencriptador.application.port;
 
-import com.encriptadordesencriptador.domain.valueobject.CipherText;
-import com.encriptadordesencriptador.domain.valueobject.GeneralKey;
-import com.encriptadordesencriptador.domain.valueobject.PlainText;
+import com.encriptadordesencriptador.domain.model.CipherText;
+import com.encriptadordesencriptador.domain.model.GeneralKey;
+import com.encriptadordesencriptador.domain.model.PlainText;
 
 public interface CipherService {
     CipherText encrypt(PlainText plainText, GeneralKey key);
